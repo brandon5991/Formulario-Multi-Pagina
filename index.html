@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario Multi-Pagina</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="page active" id="page1">
+        <h2>Datos Personales</h2>
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" required>
+        
+        <label for="edad">Edad:</label>
+        <input type="number" id="edad" min="0" required>
+
+        <label for="sexo">Sexo:</label>
+        <select id="sexo" required>
+            <option value="" disabled selected>Seleccione</option>
+            <option value="Masculino">Masculino</option>
+            <option value="Femenino">Femenino</option>
+        </select>
+
+        <div class="button-container">
+            <button onclick="nextPage(2)" aria-label="Ir a la página de Familiares">Siguiente</button>
+        </div>
+    </div>
+
+    <div class="page" id="page2">
+        <h2>Familiares</h2>
+        <label for="familiar_nombre">Nombre:</label>
+        <input type="text" id="familiar_nombre">
+        
+        <label for="familiar_parentesco">Parentesco:</label>
+        <input type="text" id="familiar_parentesco">
+        
+        <label for="familiar_edad">Edad:</label>
+        <input type="number" id="familiar_edad" min="0">
+        
+        <ul id="listaFamiliares"></ul>
+        
+        <div class="button-container">
+            <button onclick="addFamiliar()">Añadir Familiar</button>
+            <button onclick="previousPage(1)" aria-label="Regresar a Datos Personales">Anterior</button>
+            <button onclick="nextPage(3)" aria-label="Ir a la página de Condiciones de Salud">Siguiente</button>
+        </div>
+    </div>
+
+    <div class="page" id="page3">
+        <h2>Condiciones Pre-Existentes de Salud</h2>
+        <label for="enfermedad">Enfermedad:</label>
+        <input type="text" id="enfermedad">
+        
+        <label for="tiempo_enfermedad">Tiempo con la Enfermedad:</label>
+        <input type="text" id="tiempo_enfermedad">
+        
+        <ul id="listaCondiciones"></ul>
+        
+        <div class="button-container">
+            <button onclick="addCondicion()">Añadir Condición</button>
+            <button onclick="previousPage(2)" aria-label="Regresar a Familiares">Anterior</button>
+            <button onclick="nextPage(4)" aria-label="Ir a la página de Internamientos">Siguiente</button>
+        </div>
+    </div>
+
+    <div class="page" id="page4">
+        <h2>Internamientos Realizados</h2>
+        <label for="fecha_internamiento">Fecha:</label>
+        <input type="date" id="fecha_internamiento">
+        
+        <label for="centro_medico">Centro Médico:</label>
+        <input type="text" id="centro_medico">
+        
+        <label for="diagnostico">Diagnóstico:</label>
+        <input type="text" id="diagnostico">
+        
+        <ul id="listaInternamientos"></ul>
+        
+        <div class="button-container">
+            <button onclick="addInternamiento()">Añadir Internamiento</button>
+            <button onclick="previousPage(3)" aria-label="Regresar a Condiciones de Salud">Anterior</button>
+            <button onclick="mostrarResumen()" aria-label="Ir a la página de Resumen">Siguiente</button>
+        </div>
+    </div>
+
+    <div class="page" id="page5">
+        <h2>Resumen de Datos Registrados</h2>
+        <div id="output"></div>
+       <div class="button-container">
+			<button onclick="previousPage(4)">Anterior</button>
+			<button onclick="editarDatos()">Editar</button>
+			<button onclick="guardarDatos()">Guardar</button>
+			<button onclick="resetPage()">Borrar Datos</button>
+		</div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Formulario Multi-Pagina. Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        let datos = {
+            persona: {},
+            familiares: [],
+            condiciones_salud: [],
+            internamientos: []
+        };
+
+        function nextPage(page) {
+            if (!validarPagina(page - 1)) return;
+            document.querySelector('.page.active').classList.remove('active');
+            document.getElementById('page' + page).classList.add('active');
+        }
+
+        function previousPage(page) {
+            document.querySelector('.page.active').classList.remove('active');
+            document.getElementById('page' + page).classList.add('active');
+        }
+
+        function validarPagina(page) {
+            const inputs = document.querySelectorAll(`#page${page} input, #page${page} select`);
+            for (let input of inputs) {
+                if (input.required && !input.value) {
+                    alert("Por favor, complete todos los campos obligatorios.");
+                    input.focus();
+                    return false;
+                }
+            }
+            return true;
+        }
+
+		function mostrarResumen() {
+			datos.persona.nombre = document.getElementById('nombre').value;
+			datos.persona.edad = document.getElementById('edad').value;
+			datos.persona.sexo = document.getElementById('sexo').value;
+
+			let resumenHTML = `
+				<h3>Datos Personales</h3>
+				<table>
+					<tr><th>Nombre</th><td id="editable_nombre">${datos.persona.nombre}</td></tr>
+					<tr><th>Edad</th><td id="editable_edad">${datos.persona.edad}</td></tr>
+					<tr><th>Sexo</th><td id="editable_sexo">${datos.persona.sexo}</td></tr>
+				</table>
+
+				<h3>Familiares</h3>
+				<table id="familiaresTable">
+					<tr><th>Nombre</th><th>Parentesco</th><th>Edad</th></tr>
+					${datos.familiares.map((fam, index) => 
+						`<tr>
+							<td id="familiar_nombre_${index}">${fam.nombre}</td>
+							<td id="familiar_parentesco_${index}">${fam.parentesco}</td>
+							<td id="familiar_edad_${index}">${fam.edad}</td>
+						</tr>`
+					).join('')}
+				</table>
+
+				<h3>Condiciones Pre-Existentes de Salud</h3>
+				<table id="condicionesTable">
+					<tr><th>Enfermedad</th><th>Tiempo</th></tr>
+					${datos.condiciones_salud.map((cond, index) => 
+						`<tr>
+							<td id="condicion_enfermedad_${index}">${cond.enfermedad}</td>
+							<td id="condicion_tiempo_${index}">${cond.tiempo}</td>
+						</tr>`
+					).join('')}
+				</table>
+
+				<h3>Internamientos Realizados</h3>
+				<table id="internamientosTable">
+					<tr><th>Fecha</th><th>Centro Médico</th><th>Diagnóstico</th></tr>
+					${datos.internamientos.map((int, index) => 
+						`<tr>
+							<td id="internamiento_fecha_${index}">${int.fecha}</td>
+							<td id="internamiento_centro_medico_${index}">${int.centro_medico}</td>
+							<td id="internamiento_diagnostico_${index}">${int.diagnostico}</td>
+						</tr>`
+					).join('')}
+				</table>
+			`;
+
+			document.getElementById('output').innerHTML = resumenHTML;
+			nextPage(5);
+		}
+
+		function editarDatos() {
+			// Convert text content to input fields for editing
+			document.getElementById("editable_nombre").innerHTML = `<input type="text" id="edit_nombre" value="${datos.persona.nombre}">`;
+			document.getElementById("editable_edad").innerHTML = `<input type="number" id="edit_edad" value="${datos.persona.edad}">`;
+			document.getElementById("editable_sexo").innerHTML = `
+				<select id="edit_sexo">
+					<option value="Masculino" ${datos.persona.sexo === "Masculino" ? "selected" : ""}>Masculino</option>
+					<option value="Femenino" ${datos.persona.sexo === "Femenino" ? "selected" : ""}>Femenino</option>
+				</select>`;
+
+			datos.familiares.forEach((fam, index) => {
+				document.getElementById(`familiar_nombre_${index}`).innerHTML = `<input type="text" value="${fam.nombre}" id="edit_familiar_nombre_${index}">`;
+				document.getElementById(`familiar_parentesco_${index}`).innerHTML = `<input type="text" value="${fam.parentesco}" id="edit_familiar_parentesco_${index}">`;
+				document.getElementById(`familiar_edad_${index}`).innerHTML = `<input type="number" value="${fam.edad}" id="edit_familiar_edad_${index}">`;
+			});
+
+			datos.condiciones_salud.forEach((cond, index) => {
+				document.getElementById(`condicion_enfermedad_${index}`).innerHTML = `<input type="text" value="${cond.enfermedad}" id="edit_condicion_enfermedad_${index}">`;
+				document.getElementById(`condicion_tiempo_${index}`).innerHTML = `<input type="text" value="${cond.tiempo}" id="edit_condicion_tiempo_${index}">`;
+			});
+
+			datos.internamientos.forEach((int, index) => {
+				document.getElementById(`internamiento_fecha_${index}`).innerHTML = `<input type="date" value="${int.fecha}" id="edit_internamiento_fecha_${index}">`;
+				document.getElementById(`internamiento_centro_medico_${index}`).innerHTML = `<input type="text" value="${int.centro_medico}" id="edit_internamiento_centro_medico_${index}">`;
+				document.getElementById(`internamiento_diagnostico_${index}`).innerHTML = `<input type="text" value="${int.diagnostico}" id="edit_internamiento_diagnostico_${index}">`;
+			});
+		}
+
+		function guardarDatos() {
+			// Save edited data into the datos object
+			datos.persona.nombre = document.getElementById('edit_nombre').value;
+			datos.persona.edad = document.getElementById('edit_edad').value;
+			datos.persona.sexo = document.getElementById('edit_sexo').value;
+
+			datos.familiares.forEach((fam, index) => {
+				fam.nombre = document.getElementById(`edit_familiar_nombre_${index}`).value;
+				fam.parentesco = document.getElementById(`edit_familiar_parentesco_${index}`).value;
+				fam.edad = document.getElementById(`edit_familiar_edad_${index}`).value;
+			});
+
+			datos.condiciones_salud.forEach((cond, index) => {
+				cond.enfermedad = document.getElementById(`edit_condicion_enfermedad_${index}`).value;
+				cond.tiempo = document.getElementById(`edit_condicion_tiempo_${index}`).value;
+			});
+
+			datos.internamientos.forEach((int, index) => {
+				int.fecha = document.getElementById(`edit_internamiento_fecha_${index}`).value;
+				int.centro_medico = document.getElementById(`edit_internamiento_centro_medico_${index}`).value;
+				int.diagnostico = document.getElementById(`edit_internamiento_diagnostico_${index}`).value;
+			});
+
+			// Re-render the summary with updated data
+			mostrarResumen();
+		}
+
+		function resetPage() {
+			// Reinicia la página actual
+			if (confirm("¿Estás seguro de que deseas borrar todos los datos?")) {
+				location.reload(); // Recarga la página, reiniciando todos los campos
+			}
+		}
+
+        function addFamiliar() {
+            const familiar = {
+                nombre: document.getElementById('familiar_nombre').value,
+                parentesco: document.getElementById('familiar_parentesco').value,
+                edad: document.getElementById('familiar_edad').value
+            };
+            datos.familiares.push(familiar);
+
+            const li = document.createElement('li');
+            li.textContent = `${familiar.nombre} (${familiar.parentesco}, ${familiar.edad} años)`;
+            document.getElementById('listaFamiliares').appendChild(li);
+        }
+
+        function addCondicion() {
+            const condicion = {
+                enfermedad: document.getElementById('enfermedad').value,
+                tiempo: document.getElementById('tiempo_enfermedad').value
+            };
+            datos.condiciones_salud.push(condicion);
+
+            const li = document.createElement('li');
+            li.textContent = `${condicion.enfermedad} (${condicion.tiempo})`;
+            document.getElementById('listaCondiciones').appendChild(li);
+        }
+
+        function addInternamiento() {
+            const internamiento = {
+                fecha: document.getElementById('fecha_internamiento').value,
+                centro_medico: document.getElementById('centro_medico').value,
+                diagnostico: document.getElementById('diagnostico').value
+            };
+            datos.internamientos.push(internamiento);
+
+            const li = document.createElement('li');
+            li.textContent = `${internamiento.fecha} en ${internamiento.centro_medico} (${internamiento.diagnostico})`;
+            document.getElementById('listaInternamientos').appendChild(li);
+        }
+    </script>
+</body>
+</html>

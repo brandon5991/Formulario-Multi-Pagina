@@ -1,0 +1,109 @@
+/* styles.css */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f3f3f3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    overflow-x: hidden; /* Solo oculta desplazamiento horizontal */
+}
+
+.page {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    text-align: center;
+    max-width: 100%;
+    width: 90%;
+    padding: 10px;
+    margin-bottom: 60px; /* Espacio para el footer */
+}
+
+.page.active {
+    display: block;
+    opacity: 1;
+}
+
+h2 {
+    color: #002147;
+    margin-top: -10px; /* Mueve el título hacia arriba */
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+    text-align: center;
+}
+
+input, select {
+    margin: 5px 0;
+    padding: 8px;
+    max-width: 300px;
+    width: 100%;
+}
+
+.button-container {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+button {
+    background-color: #002147;
+    color: white;
+    padding: 8px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #004080;
+}
+
+button:focus {
+    outline: 2px solid #002147;
+    outline-offset: 2px;
+}
+
+table {
+    margin: 20px auto;
+    border-collapse: collapse;
+}
+
+table, th, td {
+    border: 1px solid #ccc;
+    padding: 8px;
+}
+
+th {
+    background-color: #002147;
+    color: white;
+}
+
+td {
+    text-align: center;
+}
+
+footer {
+    text-align: center;
+    padding: 10px;
+    background-color: #002147;
+    color: white;
+    font-size: 0.9em;
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+}
