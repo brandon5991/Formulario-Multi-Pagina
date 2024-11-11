@@ -184,7 +184,6 @@
 		}
 
 		function editarDatos() {
-			// Convert text content to input fields for editing
 			document.getElementById("editable_nombre").innerHTML = `<input type="text" id="edit_nombre" value="${datos.persona.nombre}">`;
 			document.getElementById("editable_edad").innerHTML = `<input type="number" id="edit_edad" value="${datos.persona.edad}">`;
 			document.getElementById("editable_sexo").innerHTML = `
@@ -212,7 +211,6 @@
 		}
 
 		function guardarDatos() {
-			// Save edited data into the datos object
 			datos.persona.nombre = document.getElementById('edit_nombre').value;
 			datos.persona.edad = document.getElementById('edit_edad').value;
 			datos.persona.sexo = document.getElementById('edit_sexo').value;
@@ -234,14 +232,12 @@
 				int.diagnostico = document.getElementById(`edit_internamiento_diagnostico_${index}`).value;
 			});
 
-			// Re-render the summary with updated data
 			mostrarResumen();
 		}
 
 		function resetPage() {
-			// Reinicia la página actual
 			if (confirm("¿Estás seguro de que deseas borrar todos los datos?")) {
-				location.reload(); // Recarga la página, reiniciando todos los campos
+				location.reload();
 			}
 		}
 
